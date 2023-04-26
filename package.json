@@ -6,10 +6,9 @@
   "scripts": {
     "build": "tsc",
     "format": "prettier --write '**/*.ts'",
-    "format-check": "prettier --check '**/*.ts'",
     "package": "ncc build --source-map --license licenses.txt",
     "test": "jest",
-    "all": "npm run build && npm run format && npm run package && npm test"
+    "all": "npm test && npm run build && npm run format && npm run package"
   },
   "repository": {
     "type": "git",
@@ -23,7 +22,7 @@
     "mypy",
     "python"
   ],
-  "author": "",
+  "author": "artem.sereda@campus.tu-berlin.de",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.0",
