@@ -42,6 +42,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./
         name: Test Invalid Check Name
+        if: failure()
         with:
           check_name: 'bla'
           env_name: 'correct'
