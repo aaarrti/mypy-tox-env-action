@@ -1,11 +1,19 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: MyPy Action
+description: Run tox [testenv:type] and create annotations on PR with errors.
+author: 'Artem Sereda'
+branding:
+  icon: check-circle
+  color: yellow
 inputs:
-  milliseconds: # change this
+  checkName:
+    description: The name of the check to add annotations to. Generally the same as the job that uses this action
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  command:
+   description: MyPy command to run
+   default: tox run -e type
+  args:
+    description: Positional argument to pass to mypy
+
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: node16
+  main: dist/index.js

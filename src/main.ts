@@ -1,19 +1,21 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {runWithArgs} from './action'
 
 async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
-
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
-  }
+    if (!process.env.hasOwnProperty('GITHUB_TOKEN')) {
+        core.setFailed('GITHUB_TOKEN is undefined')
+    }
+    try {
+        await runWithArgs({
+            checkName: core.getInput('checkName'),
+            command: core.getInput('command'),
+            args: core.getInput('args'),
+            github_token: process.env['GITHUB_TOKEN']!!,
+            annotations_limit: 50
+        })
+    } catch (error: any) {
+        core.setFailed(error.message)
+    }
 }
 
 run()
