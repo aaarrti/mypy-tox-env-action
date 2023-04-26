@@ -2,6 +2,8 @@ import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 
+const {GITHUB_TOKEN} = process.env
+
 export interface Annotation {
   path: string
   start_line: number
@@ -60,7 +62,7 @@ async function findCheckRun(
     ref: github.context.sha
   })
   // @ts-ignore
-  runs = response.data.check_runs
+  runs = response.data.check_runs.filter(i => i.status == 'in_progress')
   for (const i of runs) {
     if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
       return i
@@ -125,7 +127,6 @@ async function run(): Promise<void> {
   if (!process.env.hasOwnProperty('GITHUB_TOKEN')) {
     core.setFailed('GITHUB_TOKEN is undefined')
   }
-  const github_token = process.env['GITHUB_TOKEN']!!
   const command = core.getInput('command')
   const env_name = core.getInput('env_name')
   const args = core.getInput('args')
@@ -135,7 +136,7 @@ async function run(): Promise<void> {
     const mypyOutput = await runMypy(command, env_name, args)
     let annotations = parseMypyOutput(mypyOutput)
     if (annotations.length >= 0) {
-      await createCheck(check_name, 'mypy failure', annotations, github_token)
+      await createCheck(check_name, 'mypy failure', annotations, GITHUB_TOKEN!!)
       core.setFailed(`${annotations.length} errors(s) found`)
     }
   } catch (error: any) {

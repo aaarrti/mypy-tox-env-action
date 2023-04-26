@@ -43,12 +43,13 @@ exports.parseMypyOutput = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const github = __importStar(__nccwpck_require__(5438));
+const { GITHUB_TOKEN } = process.env;
 // export, because we need to test it.
 const parseMypyOutput = (output, annotations_limit = 50) => output
     .split('\n')
     .map(line => line.split(':').map(i => i.trim()))
-    .filter(line => line[0].includes(".py"))
-    .map(line => line.slice(0, 4).concat([line.slice(4).join(":")]))
+    .filter(line => line[0].includes('.py'))
+    .map(line => line.slice(0, 4).concat([line.slice(4).join(':')]))
     .filter(line => line[2] === 'error')
     .map(line => {
     return {
@@ -72,7 +73,7 @@ function findCheckRun(check_name, github_token) {
         }
         response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({}, github.context.repo), { ref: github.context.sha }));
         // @ts-ignore
-        runs = response.data.check_runs;
+        runs = response.data.check_runs.filter(i => i.status == "in_progress");
         for (const i of runs) {
             if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
                 return i;
@@ -125,7 +126,6 @@ function run() {
         if (!process.env.hasOwnProperty('GITHUB_TOKEN')) {
             core.setFailed('GITHUB_TOKEN is undefined');
         }
-        const github_token = process.env['GITHUB_TOKEN'];
         const command = core.getInput('command');
         const env_name = core.getInput('env_name');
         const args = core.getInput('args');
@@ -134,7 +134,7 @@ function run() {
             const mypyOutput = yield runMypy(command, env_name, args);
             let annotations = (0, exports.parseMypyOutput)(mypyOutput);
             if (annotations.length >= 0) {
-                yield createCheck(check_name, 'mypy failure', annotations, github_token);
+                yield createCheck(check_name, 'mypy failure', annotations, GITHUB_TOKEN);
                 core.setFailed(`${annotations.length} errors(s) found`);
             }
         }
