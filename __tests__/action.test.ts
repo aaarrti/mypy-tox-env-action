@@ -1,6 +1,6 @@
 import {expect, describe, it, jest, afterEach} from '@jest/globals'
 import * as mypy_action from '../src/action'
-import {RAW_OUTPUT, TOX_RUN_OUTPUT} from './data.test'
+import {RAW_OUTPUT, TOX_RUN_OUTPUT} from './data'
 
 afterEach(() => {
   // restore replaced property
