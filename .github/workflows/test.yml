@@ -17,6 +17,7 @@ jobs:
           npm run all
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
+    name: Test
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python environment
@@ -28,21 +29,21 @@ jobs:
       - uses: ./
         name: Test No Errors
         with:
-          check_name: 'build-test'
+          check_name: 'Test'
           env_name: 'correct'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./
         name: Test Errors
         with:
-          check_name: 'build-test'
+          check_name: 'Test'
           env_name: 'invalid'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./
         name: Test Invalid Check Name
         with:
-          check_name: 'build-test'
+          check_name: 'bla'
           env_name: 'correct'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
