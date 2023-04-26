@@ -121,7 +121,11 @@ async function runMypy(
       }
     }
   }
-  await exec.exec(command, cmd_args, options)
+  try {
+    await exec.exec(command, cmd_args, options)
+  } catch (e: any) {
+    core.debug(`Exception while running mypy: ${e}`)
+  }
   return myOutput
 }
 
