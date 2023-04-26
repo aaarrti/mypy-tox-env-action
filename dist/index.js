@@ -1,7 +1,7 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 9139:
+/***/ 3109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -39,41 +39,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseMypyOutput = exports.runWithArgs = void 0;
+exports.parseMypyOutput = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const github = __importStar(__nccwpck_require__(5438));
-function runWithArgs(cmd_inputs) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const mypyOutput = yield runMypy(cmd_inputs.command, cmd_inputs.args);
-        let annotations = parseMypyOutput(mypyOutput, cmd_inputs.annotations_limit);
-        if (annotations.length == 0) {
-            return;
-        }
-        yield createCheck(cmd_inputs.checkName, 'mypy failure', annotations, cmd_inputs.github_token);
-        core.setFailed(`${annotations.length} errors(s) found`);
-    });
-}
-exports.runWithArgs = runWithArgs;
-function parseMypyOutput(output, annotations_limit = 50) {
-    return output
-        .split('\n')
-        .map(line => line.split(':').map(i => i.trim()))
-        .map(line => line.map(i => i.trim()))
-        .filter(details => details.length >= 4 && details[2] === 'error')
-        .map(details => {
-        let message = details[3];
-        message = message.slice(0, message.indexOf('[') - 1).trim();
-        return {
-            path: details[0].replace('./', ''),
-            start_line: parseInt(details[1]),
-            end_line: parseInt(details[1]),
-            annotation_level: 'failure',
-            message
-        };
-    })
-        .slice(0, annotations_limit);
-}
+// export, because we need to test it.
+const parseMypyOutput = (output, annotations_limit = 50) => output
+    .split('\n')
+    .map(line => line.split(':').map(i => i.trim()))
+    .filter(line => line[0].includes(".py"))
+    .map(line => line.slice(0, 4).concat([line.slice(4).join(":")]))
+    .filter(line => line[2] === 'error')
+    .map(line => {
+    return {
+        path: line[0].replace('./', ''),
+        start_line: parseInt(line[1]),
+        end_line: parseInt(line[1]),
+        annotation_level: 'failure',
+        message: line[3]
+    };
+})
+    .slice(0, annotations_limit);
 exports.parseMypyOutput = parseMypyOutput;
 function findCheckRun(check_name, github_token) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -116,12 +102,9 @@ function createCheck(check_name, title, annotations, github_token) {
             } }));
     });
 }
-function runMypy(command, args) {
+function runMypy(command, env_name, args) {
     return __awaiter(this, void 0, void 0, function* () {
-        let cmd_args = args.split(' ');
-        if (command.startsWith('tox') && !args.startsWith('--')) {
-            cmd_args = ['--'].concat(cmd_args);
-        }
+        let cmd_args = ['-e', env_name, '--'].concat(args.split(' '));
         let myOutput = '';
         const options = {
             listeners: {
@@ -137,63 +120,23 @@ function runMypy(command, args) {
         return myOutput;
     });
 }
-
-
-/***/ }),
-
-/***/ 3109:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(2186));
-const action_1 = __nccwpck_require__(9139);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         if (!process.env.hasOwnProperty('GITHUB_TOKEN')) {
             core.setFailed('GITHUB_TOKEN is undefined');
         }
+        const github_token = process.env['GITHUB_TOKEN'];
+        const command = core.getInput('command');
+        const env_name = core.getInput('env_name');
+        const args = core.getInput('args');
+        const check_name = core.getInput('check_name');
         try {
-            yield (0, action_1.runWithArgs)({
-                checkName: core.getInput('checkName'),
-                command: core.getInput('command'),
-                args: core.getInput('args'),
-                github_token: process.env['GITHUB_TOKEN'],
-                annotations_limit: 50
-            });
+            const mypyOutput = yield runMypy(command, env_name, args);
+            let annotations = (0, exports.parseMypyOutput)(mypyOutput);
+            if (annotations.length >= 0) {
+                yield createCheck(check_name, 'mypy failure', annotations, github_token);
+                core.setFailed(`${annotations.length} errors(s) found`);
+            }
         }
         catch (error) {
             core.setFailed(error.message);

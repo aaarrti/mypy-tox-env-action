@@ -5,12 +5,15 @@ branding:
   icon: check-circle
   color: yellow
 inputs:
-  checkName:
+  check_name:
     description: The name of the check to add annotations to. Generally the same as the job that uses this action
     required: true
   command:
-   description: MyPy command to run
-   default: tox run -e type
+    description: MyPy command to run
+    default: tox run
+  env_name:
+    description: Name of tox env to execute
+    default: type
   args:
     description: Positional argument to pass to mypy
 
