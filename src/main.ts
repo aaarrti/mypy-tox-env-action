@@ -3,6 +3,7 @@ import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 
 const {GITHUB_TOKEN} = process.env
+const annotations_limit: number = 50
 
 export interface Annotation {
   path: string
@@ -19,10 +20,7 @@ export interface CheckRun {
 }
 
 // export, because we need to test it.
-export const parseMypyOutput = (
-  output: string,
-  annotations_limit: number = 50
-): Annotation[] =>
+export const parseMypyOutput = (output: string): Annotation[] =>
   output
     .split('\n')
     .map(line => line.split(':').map(i => i.trim()))

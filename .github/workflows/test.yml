@@ -30,26 +30,26 @@ jobs:
         with:
           check_name: 'build-test'
           env_name: 'correct'
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./
         name: Test Errors
         with:
           check_name: 'build-test'
           env_name: 'invalid'
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./
         name: Test Invalid Check Name
         with:
           check_name: 'build-test'
           env_name: 'correct'
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./
         name: Test Command Failed
         with:
           check_name: 'build-test'
           command: "bla"
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
