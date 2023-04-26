@@ -135,6 +135,9 @@ async function runMypy(command: string, args: string): Promise<string> {
     listeners: {
       stdout: function (data: Buffer) {
         myOutput += data.toString()
+      },
+      stderr: function (data: Buffer) {
+        myOutput += data.toString()
       }
     }
   }

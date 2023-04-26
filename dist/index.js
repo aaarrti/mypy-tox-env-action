@@ -127,6 +127,9 @@ function runMypy(command, args) {
             listeners: {
                 stdout: function (data) {
                     myOutput += data.toString();
+                },
+                stderr: function (data) {
+                    myOutput += data.toString();
                 }
             }
         };
