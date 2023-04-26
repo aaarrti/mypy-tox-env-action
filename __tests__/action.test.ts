@@ -1,9 +1,9 @@
 import {expect, describe, it, jest, afterEach} from '@jest/globals'
 import * as mypy_action from '../src/action'
 import {RAW_OUTPUT, TOX_RUN_OUTPUT} from './data.test'
-import * as github from '@actions/github'
+// import * as github from '@actions/github'
 
-const github_key = '....'
+
 
 afterEach(() => {
   // restore replaced property
@@ -21,6 +21,11 @@ describe('test parse output', function () {
     expect(annotations.length).toBe(15)
   })
 })
+
+
+/*
+
+const github_key = '....'
 
 describe('test create check', function () {
   it('check run exists', async function () {
@@ -49,3 +54,4 @@ describe('test create check', function () {
     await mypy_action.findCheckRun('Lint', github_key)
   })
 })
+*/

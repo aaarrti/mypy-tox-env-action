@@ -98,4 +98,3 @@ Thumbs.db
 __tests__/runner/*
 lib/**/*
 .idea
-package-lock.json
