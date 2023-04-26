@@ -118,7 +118,8 @@ async function runMypy(
       },
       stderr: function (data: Buffer) {
         myOutput += data.toString()
-      }
+      },
+      ignoreReturnCode: true
     }
   }
   try {
