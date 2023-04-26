@@ -63,7 +63,7 @@ export function parseMypyOutput(
     .slice(0, annotations_limit)
 }
 
-export async function findCheckRun(
+async function findCheckRun(
   check_name: string,
   github_token: string
 ): Promise<CheckRun> {
