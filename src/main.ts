@@ -110,10 +110,15 @@ async function runMypy(
   args: string
 ): Promise<string> {
   let cmd_args = ['-e', env_name, '--'].concat(args.split(' '))
-  let output = await exec.getExecOutput(
+  try {
+    let output = await exec.getExecOutput(
     command, cmd_args, {ignoreReturnCode: true}
   )
   core.info(`output = ${output}`)
+  }catch (error: any){
+    core.error(`Failed to run mypy: ${error}`, error)
+  }
+
   return ""
 }
 
@@ -136,7 +141,8 @@ async function run(): Promise<void> {
       core.setFailed(`${annotations.length} errors(s) found`)
     }
   } catch (error: any) {
-    core.setFailed(`Failed with: ${error}`)
+    core.error(`Failed with: ${error.message}`)
+    core.setFailed(`Failed with: ${error.message}`)
   }
 }
 
