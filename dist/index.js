@@ -44,8 +44,9 @@ const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const github = __importStar(__nccwpck_require__(5438));
 const { GITHUB_TOKEN } = process.env;
+const annotations_limit = 50;
 // export, because we need to test it.
-const parseMypyOutput = (output, annotations_limit = 50) => output
+const parseMypyOutput = (output) => output
     .split('\n')
     .map(line => line.split(':').map(i => i.trim()))
     .filter(line => line[0].includes('.py'))
@@ -68,12 +69,15 @@ function findCheckRun(check_name, github_token) {
         let response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({ check_name }, github.context.repo), { ref: github.context.sha }));
         // @ts-ignore
         let runs = response.data.check_runs;
+        core.debug(`${check_name}'s runs = ${runs}`);
         if (runs.length > 0) {
             return runs[0];
         }
         response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({}, github.context.repo), { ref: github.context.sha }));
         // @ts-ignore
-        runs = response.data.check_runs.filter(i => i.status == "in_progress");
+        runs = response.data.check_runs;
+        core.debug(`runs = ${runs}`);
+        runs = runs.filter(i => i.status == 'in_progress');
         for (const i of runs) {
             if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
                 return i;
@@ -132,8 +136,10 @@ function run() {
         const check_name = core.getInput('check_name');
         try {
             const mypyOutput = yield runMypy(command, env_name, args);
+            core.debug(`MyPy output = ${mypyOutput}`);
             let annotations = (0, exports.parseMypyOutput)(mypyOutput);
-            if (annotations.length >= 0) {
+            core.debug(`Parsed annotations = ${annotations}`);
+            if (annotations.length > 0) {
                 yield createCheck(check_name, 'mypy failure', annotations, GITHUB_TOKEN);
                 core.setFailed(`${annotations.length} errors(s) found`);
             }
