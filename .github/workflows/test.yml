@@ -42,7 +42,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./
         name: Test Invalid Check Name
-        if: failure()
+        if: always()
         with:
           check_name: 'bla'
           env_name: 'correct'
@@ -50,6 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./
         name: Test Command Failed
+        if: always()
         with:
           check_name: 'build-test'
           command: "bla"
