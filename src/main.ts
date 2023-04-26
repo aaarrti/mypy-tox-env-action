@@ -112,7 +112,7 @@ async function runMypy(
   let cmd_args = ['-e', env_name, '--'].concat(args.split(' '))
   try {
     let output = await exec.getExecOutput(
-    command, cmd_args, {ignoreReturnCode: true}
+    command, [], {ignoreReturnCode: true}
   )
   core.info(`output = ${output}`)
   }catch (error: any){
