@@ -10,7 +10,7 @@ inputs:
     required: true
   command:
     description: MyPy command to run
-    default: tox run
+    default: python -m tox run
   env_name:
     description: Name of tox env to execute
     default: type
