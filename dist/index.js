@@ -69,14 +69,14 @@ function findCheckRun(check_name, github_token) {
         let response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({ check_name }, github.context.repo), { ref: github.context.sha }));
         // @ts-ignore
         let runs = response.data.check_runs;
-        core.debug(`${check_name}'s runs = ${runs}`);
+        core.info(`${check_name}'s runs = ${JSON.stringify(runs)}`);
         if (runs.length > 0) {
             return runs[0];
         }
         response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({}, github.context.repo), { ref: github.context.sha }));
         // @ts-ignore
         runs = response.data.check_runs;
-        core.debug(`runs = ${runs}`);
+        core.debug(`All runs = ${JSON.stringify(runs)}`);
         runs = runs.filter(i => i.status == 'in_progress');
         for (const i of runs) {
             if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
@@ -110,8 +110,10 @@ function createCheck(check_name, title, annotations, github_token) {
 function runMypy(command, env_name, args) {
     return __awaiter(this, void 0, void 0, function* () {
         let cmd_args = ['-e', env_name, '--'].concat(args.split(' '));
-        const output = yield exec.getExecOutput(command, cmd_args, { ignoreReturnCode: true });
-        core.info(`Exec output = ${output}`);
+        const output = yield exec.getExecOutput(command, cmd_args, {
+            ignoreReturnCode: true
+        });
+        core.info(`Exec output = ${JSON.stringify(output)}`);
         return output;
     });
 }
@@ -126,16 +128,15 @@ function run() {
         const check_name = core.getInput('check_name');
         try {
             const mypyOutput = yield runMypy(command, env_name, args);
-            core.debug(`MyPy output = ${mypyOutput}`);
             let annotations = (0, exports.parseMypyOutput)(mypyOutput.stdout);
-            core.debug(`Parsed annotations = ${annotations}`);
+            core.info(`Parsed annotations = ${JSON.stringify(annotations)}`);
             if (annotations.length > 0) {
                 yield createCheck(check_name, 'mypy failure', annotations, GITHUB_TOKEN);
                 core.setFailed(`${annotations.length} errors(s) found`);
             }
         }
         catch (error) {
-            core.error(`Failed with: ${error.message}`);
+            core.error(`Failed with: ${JSON.stringify(error)}`);
             core.setFailed(`Failed with: ${error.message}`);
         }
     });

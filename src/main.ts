@@ -51,7 +51,7 @@ async function findCheckRun(
   })
   // @ts-ignore
   let runs: CheckRun[] = response.data.check_runs
-  core.debug(`${check_name}'s runs = ${runs}`)
+  core.info(`${check_name}'s runs = ${JSON.stringify(runs)}`)
 
   if (runs.length > 0) {
     return runs[0]
@@ -63,7 +63,7 @@ async function findCheckRun(
   })
   // @ts-ignore
   runs = response.data.check_runs
-  core.debug(`runs = ${runs}`)
+  core.debug(`All runs = ${JSON.stringify(runs)}`)
 
   runs = runs.filter(i => i.status == 'in_progress')
   for (const i of runs) {
@@ -114,7 +114,7 @@ async function runMypy(
   const output = await exec.getExecOutput(command, cmd_args, {
     ignoreReturnCode: true
   })
-  core.info(`Exec output = ${output}`)
+  core.info(`Exec output = ${JSON.stringify(output)}`)
   return output
 }
 
@@ -129,15 +129,14 @@ async function run(): Promise<void> {
 
   try {
     const mypyOutput = await runMypy(command, env_name, args)
-    core.debug(`MyPy output = ${mypyOutput}`)
     let annotations = parseMypyOutput(mypyOutput.stdout)
-    core.debug(`Parsed annotations = ${annotations}`)
+    core.info(`Parsed annotations = ${JSON.stringify(annotations)}`)
     if (annotations.length > 0) {
       await createCheck(check_name, 'mypy failure', annotations, GITHUB_TOKEN!!)
       core.setFailed(`${annotations.length} errors(s) found`)
     }
   } catch (error: any) {
-    core.error(`Failed with: ${error.message}`)
+    core.error(`Failed with: ${JSON.stringify(error)}`)
     core.setFailed(`Failed with: ${error.message}`)
   }
 }
