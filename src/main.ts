@@ -63,7 +63,6 @@ async function findCheckRun(
   })
   runs = response.data.check_runs
   core.info(`All runs = ${runs}`)
-  runs = runs.filter(i => i.status == 'in_progress')
   for (const i of runs) {
     if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
       return i
