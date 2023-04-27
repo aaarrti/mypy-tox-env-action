@@ -15,7 +15,7 @@ export interface Annotation {
 }
 
 export interface CheckRun {
-  id: string
+  id: number
   name: string
   status: 'queued' | 'in_progress' | 'completed'
 }
@@ -49,7 +49,7 @@ async function findCheckRun(
     ...github.context.repo,
     ref: github.context.sha
   })
-  // @ts-ignore
+
   let runs: CheckRun[] = response.data.check_runs
   core.info(`${check_name}'s runs = ${JSON.stringify(runs)}`)
 
@@ -61,7 +61,6 @@ async function findCheckRun(
     ...github.context.repo,
     ref: github.context.sha
   })
-  // @ts-ignore
   runs = response.data.check_runs
   core.info(`All runs = ${JSON.stringify(runs)}`)
 
