@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
+import { ExecOutput } from "@actions/exec";
 
 const {GITHUB_TOKEN} = process.env
 const annotations_limit: number = 50
@@ -108,18 +109,11 @@ async function runMypy(
   command: string,
   env_name: string,
   args: string
-): Promise<string> {
+): Promise<ExecOutput> {
   let cmd_args = ['-e', env_name, '--'].concat(args.split(' '))
-  try {
-    let output = await exec.getExecOutput(
-    command, [], {ignoreReturnCode: true}
-  )
-  core.info(`output = ${output}`)
-  }catch (error: any){
-    core.error(`Failed to run mypy: ${error}`, error)
-  }
-
-  return ""
+  const output = await exec.getExecOutput(command, [], {ignoreReturnCode: true})
+  core.info(`Exec output = ${output}`)
+  return output
 }
 
 async function run(): Promise<void> {
@@ -134,7 +128,7 @@ async function run(): Promise<void> {
   try {
     const mypyOutput = await runMypy(command, env_name, args)
     core.debug(`MyPy output = ${mypyOutput}`)
-    let annotations = parseMypyOutput(mypyOutput)
+    let annotations = parseMypyOutput(mypyOutput.stdout)
     core.debug(`Parsed annotations = ${annotations}`)
     if (annotations.length > 0) {
       await createCheck(check_name, 'mypy failure', annotations, GITHUB_TOKEN!!)
