@@ -63,7 +63,7 @@ async function findCheckRun(
   })
   // @ts-ignore
   runs = response.data.check_runs
-  core.debug(`All runs = ${JSON.stringify(runs)}`)
+  core.info(`All runs = ${JSON.stringify(runs)}`)
 
   runs = runs.filter(i => i.status == 'in_progress')
   for (const i of runs) {
