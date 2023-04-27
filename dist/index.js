@@ -110,19 +110,9 @@ function createCheck(check_name, title, annotations, github_token) {
 function runMypy(command, env_name, args) {
     return __awaiter(this, void 0, void 0, function* () {
         let cmd_args = ['-e', env_name, '--'].concat(args.split(' '));
-        let myOutput = '';
-        const options = {
-            listeners: {
-                stdout: function (data) {
-                    myOutput += data.toString();
-                },
-                stderr: function (data) {
-                    myOutput += data.toString();
-                }
-            }
-        };
-        yield exec.exec(command, cmd_args, options);
-        return myOutput;
+        const output = yield exec.getExecOutput(command, cmd_args, { ignoreReturnCode: true });
+        core.info(`Exec output = ${output}`);
+        return output;
     });
 }
 function run() {
@@ -137,7 +127,7 @@ function run() {
         try {
             const mypyOutput = yield runMypy(command, env_name, args);
             core.debug(`MyPy output = ${mypyOutput}`);
-            let annotations = (0, exports.parseMypyOutput)(mypyOutput);
+            let annotations = (0, exports.parseMypyOutput)(mypyOutput.stdout);
             core.debug(`Parsed annotations = ${annotations}`);
             if (annotations.length > 0) {
                 yield createCheck(check_name, 'mypy failure', annotations, GITHUB_TOKEN);
@@ -145,7 +135,8 @@ function run() {
             }
         }
         catch (error) {
-            core.setFailed(error.message);
+            core.error(`Failed with: ${error.message}`);
+            core.setFailed(`Failed with: ${error.message}`);
         }
     });
 }
