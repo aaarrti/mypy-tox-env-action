@@ -76,7 +76,7 @@ function findCheckRun(check_name, github_token) {
         response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({}, github.context.repo), { ref: github.context.sha }));
         // @ts-ignore
         runs = response.data.check_runs;
-        core.debug(`All runs = ${JSON.stringify(runs)}`);
+        core.info(`All runs = ${JSON.stringify(runs)}`);
         runs = runs.filter(i => i.status == 'in_progress');
         for (const i of runs) {
             if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
