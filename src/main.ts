@@ -51,7 +51,7 @@ async function findCheckRun(
   })
 
   let runs: CheckRun[] = response.data.check_runs
-  core.info(`${check_name}'s runs = ${JSON.stringify(runs)}`)
+  core.info(`${check_name}'s runs = ${runs.map(i => JSON.stringify(i))}`)
 
   if (runs.length > 0) {
     return runs[0]
@@ -62,7 +62,7 @@ async function findCheckRun(
     ref: github.context.sha
   })
   runs = response.data.check_runs
-  core.info(`All runs = ${JSON.stringify(runs)}`)
+  core.info(`All runs = ${runs.map(i => JSON.stringify(i))}`)
 
   runs = runs.filter(i => i.status == 'in_progress')
   for (const i of runs) {

@@ -67,16 +67,14 @@ function findCheckRun(check_name, github_token) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = github.getOctokit(String(github_token));
         let response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({ check_name }, github.context.repo), { ref: github.context.sha }));
-        // @ts-ignore
         let runs = response.data.check_runs;
-        core.info(`${check_name}'s runs = ${JSON.stringify(runs)}`);
+        core.info(`${check_name}'s runs = ${runs.map(i => JSON.stringify(i))}`);
         if (runs.length > 0) {
             return runs[0];
         }
         response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({}, github.context.repo), { ref: github.context.sha }));
-        // @ts-ignore
         runs = response.data.check_runs;
-        core.info(`All runs = ${JSON.stringify(runs)}`);
+        core.info(`All runs = ${runs.map(i => JSON.stringify(i))}`);
         runs = runs.filter(i => i.status == 'in_progress');
         for (const i of runs) {
             if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
