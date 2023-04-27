@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
-import { ExecOutput } from "@actions/exec";
+import {ExecOutput} from '@actions/exec'
 
 const {GITHUB_TOKEN} = process.env
 const annotations_limit: number = 50
@@ -111,7 +111,9 @@ async function runMypy(
   args: string
 ): Promise<ExecOutput> {
   let cmd_args = ['-e', env_name, '--'].concat(args.split(' '))
-  const output = await exec.getExecOutput(command, [], {ignoreReturnCode: true})
+  const output = await exec.getExecOutput(command, cmd_args, {
+    ignoreReturnCode: true
+  })
   core.info(`Exec output = ${output}`)
   return output
 }
