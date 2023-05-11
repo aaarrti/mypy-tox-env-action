@@ -157,3 +157,13 @@ test('test parse output', function () {
   const annotations = mypy_action.parseMypyOutput(tox_output)
   expect(annotations).toMatchObject(expected)
 })
+
+//test('test runs', () => {
+//  process.env['GITHUB_TOKEN'] = ''
+//  const np = process.execPath
+//  const ip = path.join(__dirname, '..', 'lib', 'main.js')
+//  const options: cp.ExecFileSyncOptions = {
+//    env: process.env
+//  }
+//  console.log(cp.execFileSync(np, [ip], options).toString())
+//})

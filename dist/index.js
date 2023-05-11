@@ -68,6 +68,7 @@ function findCheckRun(check_name, github_token) {
         const octokit = github.getOctokit(String(github_token));
         // @ts-ignore
         let response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({ check_name }, github.context.repo), { ref: github.context.sha }));
+        core.info(JSON.stringify(Object.assign(Object.assign({}, github.context.repo), { ref: github.context.sha })));
         // @ts-ignore
         let runs = response.data.check_runs;
         core.info(`${check_name}'s runs = ${runs}`);
@@ -150,7 +151,6 @@ function run() {
             }
         }
         catch (error) {
-            core.error(`Failed with: ${JSON.stringify(error)}`);
             core.setFailed(`Failed with: ${error.message}`);
         }
     });

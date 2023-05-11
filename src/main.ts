@@ -1,7 +1,6 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
-import {ExecOutput} from '@actions/exec'
 import {components} from '@octokit/openapi-types'
 
 const {GITHUB_TOKEN} = process.env
@@ -48,6 +47,8 @@ async function findCheckRun(
     ...github.context.repo,
     ref: github.context.sha
   })
+
+  core.info(JSON.stringify({...github.context.repo, ref: github.context.sha}))
 
   // @ts-ignore
   let runs: CheckRun[] = response.data.check_runs
