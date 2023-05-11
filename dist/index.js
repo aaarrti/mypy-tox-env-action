@@ -75,19 +75,26 @@ function findCheckRun(check_name, github_token) {
         if (runs.length > 0) {
             return runs[0];
         }
-        const check_run = yield octokit.rest.checks.create(Object.assign(Object.assign({}, github.context.repo), { head_sha: github.context.sha, name: check_name }));
-        return check_run.data;
     });
 }
 function createCheck(check_name, title, annotations, github_token) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = github.getOctokit(String(github_token));
         const check_run = yield findCheckRun(check_name, github_token);
-        yield octokit.rest.checks.update(Object.assign(Object.assign({}, github.context.repo), { check_run: check_run.id, output: {
-                title,
-                summary: `${annotations.length} typing errors(s) found`,
-                annotations
-            } }));
+        if (check_run !== undefined) {
+            yield octokit.rest.checks.update(Object.assign(Object.assign({}, github.context.repo), { check_run: check_run.id, output: {
+                    title,
+                    summary: `${annotations.length} typing errors(s) found`,
+                    annotations
+                } }));
+        }
+        else {
+            yield octokit.rest.checks.create(Object.assign(Object.assign({}, github.context.repo), { head_sha: github.context.sha, name: check_name, output: {
+                    title,
+                    summary: `${annotations.length} typing errors(s) found`,
+                    annotations
+                } }));
+        }
     });
 }
 function runMypy(command, env_name, args) {
