@@ -39,7 +39,7 @@ export const parseMypyOutput = (output: string): Annotation[] =>
 async function findCheckRun(
   check_name: string,
   github_token: string
-): Promise<CheckRun | undefined> {
+): Promise<CheckRun> {
   const octokit = github.getOctokit(String(github_token))
   // @ts-ignore
   let response: Response = await octokit.rest.checks.listForRef({
@@ -57,31 +57,12 @@ async function findCheckRun(
   if (runs.length > 0) {
     return runs[0]
   }
-
-  // @ts-ignore
-  response = await octokit.rest.checks.listForRef({
+  const check_run = await octokit.rest.checks.create({
     ...github.context.repo,
-    ref: github.context.sha
+    head_sha: github.context.sha,
+    name: check_name
   })
-  // @ts-ignore
-  runs = response.data.check_runs
-  core.info(`All runs = ${JSON.stringify(runs)}`)
-  for (const i of runs) {
-    if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
-      return i
-    }
-  }
-  for (const i of runs) {
-    if (i.name.toLocaleLowerCase().includes('mypy')) {
-      return i
-    }
-  }
-  for (const i of runs) {
-    if (i.name.toLocaleLowerCase().includes('type')) {
-      return i
-    }
-  }
-  throw new Error(`Could not find check run with name ${check_name}.\n`)
+  return check_run.data
 }
 
 async function createCheck(
@@ -92,32 +73,16 @@ async function createCheck(
 ): Promise<void> {
   const octokit = github.getOctokit(String(github_token))
   const check_run = await findCheckRun(check_name, github_token)
-  if (check_run !== undefined) {
-    await octokit.rest.checks.update({
-      ...github.context.repo,
-      check_run: check_run.id,
-      output: {
-        title,
-        summary: `${annotations.length} typing errors(s) found`,
-        annotations
-      }
-    })
-  } else {
-    const checkRun = await octokit.rest.checks.create({
-      ...github.context.repo,
-      head_sha: github.context.sha,
-      name: check_name
-    })
-    await octokit.rest.checks.update({
-      ...github.context.repo,
-      check_run: checkRun.data.id,
-      output: {
-        title,
-        summary: `${annotations.length} typing errors(s) found`,
-        annotations
-      }
-    })
-  }
+
+  await octokit.rest.checks.update({
+    ...github.context.repo,
+    check_run: check_run.id,
+    output: {
+      title,
+      summary: `${annotations.length} typing errors(s) found`,
+      annotations
+    }
+  })
 }
 
 async function runMypy(

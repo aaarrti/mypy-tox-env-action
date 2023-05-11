@@ -47,17 +47,17 @@ const { GITHUB_TOKEN } = process.env;
 const annotations_limit = 50;
 // export, because we need to test it.
 const parseMypyOutput = (output) => output
-    .split('\n')
-    .map(line => line.split(':').map(i => i.trim()))
-    .filter(line => line[0].includes('.py'))
-    .map(line => line.slice(0, 4).concat([line.slice(4).join(':')]))
-    .filter(line => line[2] === 'error')
+    .split("\n")
+    .map(line => line.split(":").map(i => i.trim()))
+    .filter(line => line[0].includes(".py"))
+    .map(line => line.slice(0, 4).concat([line.slice(4).join(":")]))
+    .filter(line => line[2] === "error")
     .map(line => {
     return {
-        path: line[0].replace('./', ''),
+        path: line[0].replace("./", ""),
         start_line: parseInt(line[1]),
         end_line: parseInt(line[1]),
-        annotation_level: 'failure',
+        annotation_level: "failure",
         message: line[3]
     };
 })
@@ -75,57 +75,28 @@ function findCheckRun(check_name, github_token) {
         if (runs.length > 0) {
             return runs[0];
         }
-        // @ts-ignore
-        response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({}, github.context.repo), { ref: github.context.sha }));
-        // @ts-ignore
-        runs = response.data.check_runs;
-        core.info(`All runs = ${JSON.stringify(runs)}`);
-        for (const i of runs) {
-            if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
-                return i;
-            }
-        }
-        for (const i of runs) {
-            if (i.name.toLocaleLowerCase().includes('mypy')) {
-                return i;
-            }
-        }
-        for (const i of runs) {
-            if (i.name.toLocaleLowerCase().includes('type')) {
-                return i;
-            }
-        }
-        throw new Error(`Could not find check run with name ${check_name}.\n`);
+        const check_run = yield octokit.rest.checks.create(Object.assign(Object.assign({}, github.context.repo), { head_sha: github.context.sha, name: check_name }));
+        return check_run.data;
     });
 }
 function createCheck(check_name, title, annotations, github_token) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = github.getOctokit(String(github_token));
         const check_run = yield findCheckRun(check_name, github_token);
-        if (check_run !== undefined) {
-            yield octokit.rest.checks.update(Object.assign(Object.assign({}, github.context.repo), { check_run: check_run.id, output: {
-                    title,
-                    summary: `${annotations.length} typing errors(s) found`,
-                    annotations
-                } }));
-        }
-        else {
-            const checkRun = yield octokit.rest.checks.create(Object.assign(Object.assign({}, github.context.repo), { head_sha: github.context.sha, name: check_name }));
-            yield octokit.rest.checks.update(Object.assign(Object.assign({}, github.context.repo), { check_run: checkRun.data.id, output: {
-                    title,
-                    summary: `${annotations.length} typing errors(s) found`,
-                    annotations
-                } }));
-        }
+        yield octokit.rest.checks.update(Object.assign(Object.assign({}, github.context.repo), { check_run: check_run.id, output: {
+                title,
+                summary: `${annotations.length} typing errors(s) found`,
+                annotations
+            } }));
     });
 }
 function runMypy(command, env_name, args) {
     return __awaiter(this, void 0, void 0, function* () {
-        let cmd_args = ['-e', env_name, '--'].concat(args.split(' '));
-        if (command.startsWith('tox') && !args.startsWith('--')) {
-            cmd_args = ['--'].concat(cmd_args);
+        let cmd_args = ["-e", env_name, "--"].concat(args.split(" "));
+        if (command.startsWith("tox") && !args.startsWith("--")) {
+            cmd_args = ["--"].concat(cmd_args);
         }
-        let mypyOutput = '';
+        let mypyOutput = "";
         const options = {
             listeners: {
                 stdout: function (data) {
@@ -144,19 +115,19 @@ function runMypy(command, env_name, args) {
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!process.env.hasOwnProperty('GITHUB_TOKEN')) {
-            core.setFailed('GITHUB_TOKEN is undefined');
+        if (!process.env.hasOwnProperty("GITHUB_TOKEN")) {
+            core.setFailed("GITHUB_TOKEN is undefined");
         }
-        const command = core.getInput('command');
-        const env_name = core.getInput('env_name');
-        const args = core.getInput('args');
-        const check_name = core.getInput('check_name');
+        const command = core.getInput("command");
+        const env_name = core.getInput("env_name");
+        const args = core.getInput("args");
+        const check_name = core.getInput("check_name");
         try {
             const mypyOutput = yield runMypy(command, env_name, args);
             let annotations = (0, exports.parseMypyOutput)(mypyOutput);
             core.info(`Parsed annotations = ${JSON.stringify(annotations)}`);
             if (annotations.length > 0) {
-                yield createCheck(check_name, 'mypy failure', annotations, GITHUB_TOKEN);
+                yield createCheck(check_name, "mypy failure", annotations, GITHUB_TOKEN);
                 core.setFailed(`${annotations.length} errors(s) found`);
             }
         }
