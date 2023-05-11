@@ -145,7 +145,6 @@ async function run(): Promise<void> {
       core.setFailed(`${annotations.length} errors(s) found`)
     }
   } catch (error: any) {
-    core.error(`Failed with: ${JSON.stringify(error)}`)
     core.setFailed(`Failed with: ${error.message}`)
   }
 }
