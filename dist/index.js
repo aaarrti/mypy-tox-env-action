@@ -79,7 +79,7 @@ function findCheckRun(check_name, github_token) {
         response = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({}, github.context.repo), { ref: github.context.sha }));
         // @ts-ignore
         runs = response.data.check_runs;
-        core.info(`All runs = ${runs}`);
+        core.info(`All runs = ${JSON.stringify(runs)}`);
         for (const i of runs) {
             if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
                 return i;
