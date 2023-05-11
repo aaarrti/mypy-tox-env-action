@@ -9,6 +9,7 @@ on: # rebuild any PRs and main branch changes
 permissions: write-all
 jobs:
   test: # make sure the action works on a clean machine without building
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -34,7 +35,7 @@ jobs:
       - uses: ./
         name: Test Errors
         with:
-          check_name: 'test'
+          check_name: 'Test'
           env_name: 'invalid'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

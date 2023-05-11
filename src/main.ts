@@ -28,7 +28,7 @@ export const parseMypyOutput = (output: string): Annotation[] =>
       return {
         path: line[0].replace('./', ''),
         start_line: parseInt(line[1]),
-        end_line: parseInt(line[2]),
+        end_line: parseInt(line[1]),
         annotation_level: 'failure',
         message: line[3]
       }
