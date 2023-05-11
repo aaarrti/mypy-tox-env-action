@@ -7,7 +7,6 @@ const {GITHUB_TOKEN} = process.env
 const annotations_limit: number = 50
 
 type CheckRun = components['schemas']['check-run']
-type CheckAnnotation = components['schemas']['check-annotation']
 
 export interface Annotation {
   path: string
@@ -79,10 +78,14 @@ async function createCheck(
       }
     })
   } else {
-    await octokit.rest.checks.create({
+    const response = await octokit.rest.checks.create({
       ...github.context.repo,
       head_sha: github.context.sha,
-      name: check_name,
+      name: check_name
+    })
+    await octokit.rest.checks.update({
+      ...github.context.repo,
+      check_run: response.data.id,
       output: {
         title,
         summary: `${annotations.length} typing errors(s) found`,

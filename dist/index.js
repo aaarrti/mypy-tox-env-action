@@ -89,7 +89,8 @@ function createCheck(check_name, title, annotations, github_token) {
                 } }));
         }
         else {
-            yield octokit.rest.checks.create(Object.assign(Object.assign({}, github.context.repo), { head_sha: github.context.sha, name: check_name, output: {
+            const response = yield octokit.rest.checks.create(Object.assign(Object.assign({}, github.context.repo), { head_sha: github.context.sha, name: check_name }));
+            yield octokit.rest.checks.update(Object.assign(Object.assign({}, github.context.repo), { check_run: response.data.id, output: {
                     title,
                     summary: `${annotations.length} typing errors(s) found`,
                     annotations
