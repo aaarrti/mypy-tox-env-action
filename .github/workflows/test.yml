@@ -33,7 +33,7 @@ jobs:
       - uses: ./
         name: Test Errors
         with:
-          check_name: 'test'
+          check_name: 'Test Errors'
           env_name: 'invalid'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
