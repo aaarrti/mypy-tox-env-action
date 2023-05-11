@@ -65,7 +65,7 @@ async function findCheckRun(
   })
   // @ts-ignore
   runs = response.data.check_runs
-  core.info(`All runs = ${runs}`)
+  core.info(`All runs = ${JSON.stringify(runs)}`)
   for (const i of runs) {
     if (i.name.toLocaleLowerCase() === check_name.toLowerCase()) {
       return i
