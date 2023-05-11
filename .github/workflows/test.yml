@@ -22,8 +22,6 @@ jobs:
           python-version: "3.10"
       - name: Install tox
         run: pip install tox
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
       - uses: ./
         name: Test No Errors
         with:
@@ -31,6 +29,8 @@ jobs:
           env_name: 'correct'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - uses: ./
         name: Test Errors
         with:
