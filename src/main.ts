@@ -2,9 +2,15 @@ import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 import {ExecOutput} from '@actions/exec'
+import { components } from "@octokit/openapi-types";
 
 const {GITHUB_TOKEN} = process.env
 const annotations_limit: number = 50
+
+
+type CheckRun = components["schemas"]["check-run"]
+type CheckAnnotation = components["schemas"]["check-annotation"]
+
 
 export interface Annotation {
   path: string
@@ -12,12 +18,6 @@ export interface Annotation {
   end_line: number
   annotation_level: string
   message: string
-}
-
-export interface CheckRun {
-  id: number
-  name: string
-  status: 'queued' | 'in_progress' | 'completed'
 }
 
 // export, because we need to test it.
@@ -44,7 +44,7 @@ async function findCheckRun(
   github_token: string
 ): Promise<CheckRun> {
   const octokit = github.getOctokit(String(github_token))
-  let response = await octokit.rest.checks.listForRef({
+  let response: Response = await octokit.rest.checks.listForRef({
     check_name,
     ...github.context.repo,
     ref: github.context.sha
