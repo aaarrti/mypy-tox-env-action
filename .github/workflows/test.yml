@@ -1,0 +1,57 @@
+name: 'Test'
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+permissions: write-all
+jobs:
+  test: # make sure the action works on a clean machine without building
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          npm install
+      - run: |
+          npm run all
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install tox
+        run: pip install tox
+      - uses: ./
+        name: Test No Errors
+        with:
+          check_name: 'Test'
+          env_name: 'correct'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./
+        name: Test Errors
+        with:
+          check_name: 'Test'
+          env_name: 'invalid'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- uses: ./
+      #  name: Test Invalid Check Name
+      #  if: always()
+      #  with:
+      #    check_name: 'bla'
+      #    env_name: 'correct'
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- uses: ./
+      #  name: Test Command Failed
+      #  if: always()
+      #  with:
+      #    check_name: 'build-test'
+      #    command: "bla"
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
