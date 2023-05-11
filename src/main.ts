@@ -112,7 +112,7 @@ async function runMypy(
   try {
     await exec.exec(command, cmd_args, options)
   } catch (err: any) {
-    core.error(err.message)
+    //core.error(err.message)
   }
   return mypyOutput
 }

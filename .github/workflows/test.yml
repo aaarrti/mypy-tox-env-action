@@ -16,6 +16,8 @@ jobs:
           npm install
       - run: |
           npm run all
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Python environment
         uses: actions/setup-python@v4
         with:
