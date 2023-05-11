@@ -2,15 +2,13 @@ import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 import {ExecOutput} from '@actions/exec'
-import { components } from "@octokit/openapi-types";
+import {components} from '@octokit/openapi-types'
 
 const {GITHUB_TOKEN} = process.env
 const annotations_limit: number = 50
 
-
-type CheckRun = components["schemas"]["check-run"]
-type CheckAnnotation = components["schemas"]["check-annotation"]
-
+type CheckRun = components['schemas']['check-run']
+type CheckAnnotation = components['schemas']['check-annotation']
 
 export interface Annotation {
   path: string
@@ -44,12 +42,14 @@ async function findCheckRun(
   github_token: string
 ): Promise<CheckRun> {
   const octokit = github.getOctokit(String(github_token))
+  // @ts-ignore
   let response: Response = await octokit.rest.checks.listForRef({
     check_name,
     ...github.context.repo,
     ref: github.context.sha
   })
 
+  // @ts-ignore
   let runs: CheckRun[] = response.data.check_runs
   core.info(`${check_name}'s runs = ${runs}`)
 
@@ -57,10 +57,12 @@ async function findCheckRun(
     return runs[0]
   }
 
+  // @ts-ignore
   response = await octokit.rest.checks.listForRef({
     ...github.context.repo,
     ref: github.context.sha
   })
+  // @ts-ignore
   runs = response.data.check_runs
   core.info(`All runs = ${runs}`)
   for (const i of runs) {
@@ -78,9 +80,7 @@ async function findCheckRun(
       return i
     }
   }
-  throw new Error(
-    `Could not find check run with name ${check_name}.\n`
-  )
+  throw new Error(`Could not find check run with name ${check_name}.\n`)
 }
 
 async function createCheck(
@@ -106,13 +106,25 @@ async function runMypy(
   command: string,
   env_name: string,
   args: string
-): Promise<ExecOutput> {
+): Promise<string> {
   let cmd_args = ['-e', env_name, '--'].concat(args.split(' '))
-  const output = await exec.getExecOutput(command, cmd_args, {
-    ignoreReturnCode: true
-  })
-  core.info(`Exec output = ${JSON.stringify(output)}`)
-  return output
+  if (command.startsWith('tox') && !args.startsWith('--')) {
+    cmd_args = ['--'].concat(cmd_args)
+  }
+  let mypyOutput = ''
+  const options = {
+    listeners: {
+      stdout: function (data: Buffer) {
+        mypyOutput += data.toString()
+      }
+    }
+  }
+  try {
+    await exec.exec(command, cmd_args, options)
+  } catch (err: any) {
+    core.error(err.message)
+  }
+  return mypyOutput
 }
 
 async function run(): Promise<void> {
@@ -126,7 +138,7 @@ async function run(): Promise<void> {
 
   try {
     const mypyOutput = await runMypy(command, env_name, args)
-    let annotations = parseMypyOutput(mypyOutput.stdout)
+    let annotations = parseMypyOutput(mypyOutput)
     core.info(`Parsed annotations = ${JSON.stringify(annotations)}`)
     if (annotations.length > 0) {
       await createCheck(check_name, 'mypy failure', annotations, GITHUB_TOKEN!!)
