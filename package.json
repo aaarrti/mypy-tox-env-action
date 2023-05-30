@@ -40,6 +40,6 @@
     "ts-jest": "^29.1.0",
     "typescript": "^5.0.4",
     "@octokit/types": "^9.2.1",
-    "@octokit/webhooks-types": "^6.11.0"
+    "@octokit/webhooks-types": "^7.0.2"
   }
 }
